@@ -1,4 +1,4 @@
-# Ordinary Least Squares Regression
+# Least Squares Regression
 
 This repository provides an efficient implementation of the ordinary least squares regression algorithm in Java. The implementation allows for the computation of the least squares estimate of the parameters for a regression model given input data and labels, evaluation using the $R^2$ coefficient, and graphing of the least squares solution along with the input data for univariate regressors.
 
