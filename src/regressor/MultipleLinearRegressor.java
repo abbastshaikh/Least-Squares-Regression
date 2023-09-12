@@ -3,22 +3,22 @@ import util.MatrixOperations;
 
 public class MultipleLinearRegressor extends MultivariateRegressor {
 	
-	public MultipleLinearRegressor (double [][] xCor, double [] yCor) {
+	public MultipleLinearRegressor (double [][] X, double [] y) {
 		
-		super(xCor, yCor);
+		super(X, y);
 		
-		coefficients = getSolution(toA(x), toB(y));
-		equation = "y = ";
+		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.equation = "y = ";
 		
-		for(int i = 0; i < x.length; i ++) {
+		for(int i = 0; i < X[0].length + 1; i ++) {
 			
-			if(i == x.length - 1) {
-				equation += String.format("%.4f", coefficients[i]) + "x" + (i + 1);
+			if(i == X[0].length) {
+				this.equation += String.format("%.4f", this.coefficients[i]);
 			}
 			
 			else {
-				equation += String.format("%.4f", coefficients[i]) + "x" + (i + 1) + " ";
-				if (coefficients[i + 1] >= 0) equation += "+ ";
+				this.equation += String.format("%.4f", this.coefficients[i]) + "x" + (i + 1) + " ";
+				if (this.coefficients[i + 1] >= 0) this.equation += "+ ";
 			}
 			
 		}
@@ -28,29 +28,15 @@ public class MultipleLinearRegressor extends MultivariateRegressor {
 	}
 
 	
-	public double [][] toA (double [][] xCor){
-		
-		//return MatrixOperations.join(MatrixOperations.transpose(xCor), MatrixOperations.constantMatrix(xCor[0].length, 1, 1));
-		return MatrixOperations.transpose(xCor);
+	public double [][] toA (double [][] X){
+		return MatrixOperations.join(
+				X, 
+				MatrixOperations.constantMatrix(X.length, 1, 1)
+			);
 	}
 
-	public double [][] toB (double [] yCor) {		
-		return MatrixOperations.transpose1D(yCor);
-	}
-	
-	public double [] predict (double [][] xCor) {
-		
-		double [] predictions = new double [xCor[0].length];
-		
-		for (int i = 0; i < xCor[0].length; i ++) {
-			predictions[i] = 0;
-			for (int j = 0; j < xCor.length; j ++) {
-				predictions[i] += coefficients[j] * xCor[j][i];
-			}	
-		}
-		
-		return predictions;
-		
+	public double [][] toB (double [] y) {		
+		return MatrixOperations.transpose1D(y);
 	}
 	
 }

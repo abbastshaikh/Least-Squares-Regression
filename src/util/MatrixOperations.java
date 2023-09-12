@@ -120,20 +120,6 @@ public class MatrixOperations {
 		return matrix;
 	}
 	
-	// Creates M x N Double Matrix and fills with random decimals between minimum and maximum values
-	public static double [][] randomDoubleMatrix(int M, int N, int min, int max) {
-		
-		double [][] matrix = new double [M][N];
-		
-		for (int i = 0; i < M; i ++) {
-			for (int j = 0; j < N; j ++) {
-				matrix[i][j] = (Math.random() * (max - min) + min);
-			}
-		}
-		
-		return matrix;
-	}
-	
 	// Creates matrix by copying another matrix
 	public static double [][] copyMatrix (double [][] toCopy) {
 		

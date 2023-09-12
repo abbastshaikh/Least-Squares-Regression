@@ -43,7 +43,7 @@ public class Graph extends JPanel {
         
     	if (r.getX().length == r.getY().length) {
     		
-	    	this.x = r.getX();
+	    	this.x = MatrixOperations.transpose(r.getX())[0];
 	        this.y = r.getY();
 	        this.coefficients = r.getCoefficients();
 	        this.type = r.getType();
@@ -70,7 +70,7 @@ public class Graph extends JPanel {
         
     	if (r.getX().length == r.getY().length) {
     		
-    		this.x = r.getX();
+    		this.x = MatrixOperations.transpose(r.getX())[0];
     		this.y = r.getY();
 	        this.coefficients = r.getCoefficients();
 	        this.type = r.getType();
@@ -82,6 +82,9 @@ public class Graph extends JPanel {
 			xAxisMax = Math.ceil(max(this.x));
 			yAxisMin = Math.floor(min(this.y));
 			yAxisMax = Math.ceil(max(this.y));
+
+			System.out.println(xAxisMax);
+
 			xAxisRange = xAxisMax - xAxisMin;
 			yAxisRange = yAxisMax - yAxisMin;
 			xScale = (width - (2 * padding) - labelPadding) / (xAxisMax - xAxisMin);
@@ -104,19 +107,21 @@ public class Graph extends JPanel {
 	    g2.setColor(Color.BLACK);
 		
 		// Y - Axis Labels and Gridlines
-		for (int i = 0; i < (int) yAxisRange + 1; i++) {
+		int nGridDivisions = 10;
+
+		for (int i = 0; i < nGridDivisions + 1; i++) {
 		    	
 			int x1 = padding + labelPadding;
 			int x2 = pointWidth + padding + labelPadding;
 		
-			int y1 = height - ((i * (height - padding * 2 - labelPadding)) / (int) yAxisRange + padding + labelPadding);
+			int y1 = height - ((i * (height - padding * 2 - labelPadding)) / nGridDivisions + padding + labelPadding);
 			int y2 = y1;
 		        
 			g2.setColor(gridColor);
 			g2.drawLine(padding + labelPadding + 1 + pointWidth, y1, width - padding, y2);
 			
 			g2.setColor(Color.BLACK);     
-			String yLabel =  (int) (yAxisMin + i) + "";
+			String yLabel =  (int) (yAxisMin + i * (yAxisRange / nGridDivisions)) + "";
 		    FontMetrics metrics = g2.getFontMetrics();
 		    int labelWidth = metrics.stringWidth(yLabel);
 		    g2.drawString(yLabel, x1 - labelWidth - 5, y1 + (metrics.getHeight() / 2) - 3);   
@@ -125,9 +130,10 @@ public class Graph extends JPanel {
 		}
 		
 		// X - Axis Labels and Gridlines
-		for (int i = 0; i < (int) xAxisRange + 1; i++) {
+		
+		for (int i = 0; i < nGridDivisions + 1; i++) {
 			
-		    int x1 = i * (width - padding * 2 - labelPadding) / ((int) xAxisRange) + padding + labelPadding;
+		    int x1 = i * (width - padding * 2 - labelPadding) / nGridDivisions + padding + labelPadding;
 		    int x2 = x1;
 		    
 		    int y1 = height - padding - labelPadding;
@@ -137,7 +143,7 @@ public class Graph extends JPanel {
 		    g2.drawLine(x1, height - padding - labelPadding - 1 - pointWidth, x2, padding);
 		    
 		    g2.setColor(Color.BLACK);
-		    String xLabel = (int) (xAxisMin + i) + "";
+		    String xLabel = (int) (xAxisMin + i * (xAxisRange / nGridDivisions)) + "";
 		    FontMetrics metrics = g2.getFontMetrics();
 		    int labelWidth = metrics.stringWidth(xLabel);
 		    g2.drawString(xLabel, x1 - labelWidth / 2, y1 + metrics.getHeight() + 3);
@@ -163,15 +169,21 @@ public class Graph extends JPanel {
 		
 		// Regression
 		g2.setColor(lineColor);
+		g2.setStroke(new BasicStroke(2));
 		
 		if (type.equals("linear")) graphLinear(g2);
 		else if (type.equals("polynomial")) graphPolynomial(g2);
 		else if (type.equals("exponential")) graphExponential(g2);
+		else if (type.equals("logarithmic")) graphLogarithmic(g2);
 		
 		
 		// Equation and R-Squared
+		Font currentFont = g.getFont();
+		Font newFont = currentFont.deriveFont(currentFont.getSize() * 1.7F);
+		g.setFont(newFont);
+
 	    g2.drawString(display, padding + labelPadding + 25, padding + 25);
-	    g2.drawString(r2, padding + labelPadding + 25, padding + 25 + 15);
+	    g2.drawString(r2, padding + labelPadding + 25, padding + 25 + newFont.getSize() + 5);
 		    
 	}
     
@@ -201,10 +213,6 @@ public class Graph extends JPanel {
 	    
 	    for (int i = 1; i < 1000; i++) {
 	    	
-	    	if (y1 < height - padding - labelPadding - yAxisRange * yScale) {
-	    		break;
-	    	}
-	    	
 	    	int x2 = (int) (padding + labelPadding + increment * i * xScale);
 	    	
 	    	y0 = 0;
@@ -214,12 +222,37 @@ public class Graph extends JPanel {
 	    	
 		    int y2 = (int) (height - padding - labelPadding - ((y0 - yAxisMin) * yScale));
 	    	
-	    	g.drawLine(x1, y1, x2, y2);
+			if (y1 >= height - padding - labelPadding - yAxisRange * yScale && y1 <= padding + labelPadding + yAxisRange * yScale) {
+	    		g.drawLine(x1, y1, x2, y2);;
+	    	}
 	    	
 	    	x1 = x2;
 	    	y1 = y2;
 
         }
+    }
+
+	private void graphLogarithmic (Graphics g) {
+    	
+    	double increment = xAxisRange / 1000;
+		
+		int x1 = (int) (padding + labelPadding);
+		int y1 = (int) (height - padding - labelPadding - ((coefficients[0] * Math.log(xAxisMin) + coefficients[1] - yAxisMin) * yScale));
+
+		for (int i = 1; i < 1000; i++) {
+			
+			int x2 = (int) (padding + labelPadding + increment * i * xScale); 	
+	    	int y2 = (int) (height - padding - labelPadding - (coefficients[0] * Math.log(xAxisMin + increment * i) + coefficients[1] - yAxisMin) * yScale);
+		    
+			if (y1 >= height - padding - labelPadding - yAxisRange * yScale && y1 <= padding + labelPadding + yAxisRange * yScale) {
+	    		g.drawLine(x1, y1, x2, y2);;
+	    	}
+	    	
+	    	x1 = x2;
+	    	y1 = y2;
+
+        }
+    	
     }
     
     private void graphExponential (Graphics g) {
@@ -231,15 +264,12 @@ public class Graph extends JPanel {
 		
 		for (int i = 1; i < 1000; i++) {
 	    	
-			if (y1 < height - padding - labelPadding - yAxisRange * yScale) {
-	    		break;
-	    	}
-			
 			int x2 = (int) (padding + labelPadding + increment * i * xScale); 	
 	    	int y2 = (int) (height - padding - labelPadding - ((coefficients[1] * Math.pow(base, coefficients[0] * (xAxisMin + increment * i)) - yAxisMin) * yScale));
 		    
-	    	g.drawLine(x1, y1, x2, y2);
-	    	
+	    	if (y1 >= height - padding - labelPadding - yAxisRange * yScale && y1 <= padding + labelPadding + yAxisRange * yScale) {
+	    		g.drawLine(x1, y1, x2, y2);;
+	    	}
 	    	x1 = x2;
 	    	y1 = y2;
 

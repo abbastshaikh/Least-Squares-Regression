@@ -1,56 +1,60 @@
 package regressor;
+
 import util.Graph;
 import util.MatrixOperations;
 
-public class ExponentialRegressor extends Regressor{
+public class ExponentialRegressor extends UnivariateRegressor{
 		
 	protected double base;
 	
-	public ExponentialRegressor (double [] xCor, double [] yCor, double b) {
+	public ExponentialRegressor (double [][] X, double [] y, double b) {
 		
-		super(xCor, yCor);
-		base = b;
-		type = "exponential";
+		super(X, y);
+		this.base = b;
+		this.type = "exponential";
 		
-		coefficients = getSolution(toA(x), toB(y));
-		coefficients[1] = Math.pow(base, coefficients[1]);
+		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.coefficients[1] = Math.pow(base, this.coefficients[1]);
 		
-		equation = "y = " + String.format("%.4f", coefficients[1]) + " * " + (base == Math.E ? "e" : base) + "^(" + String.format("%.4f", coefficients[0]) + " * x)";
+		this.equation = "y = " + String.format("%.4f", this.coefficients[1]) + " * " + (this.base == Math.E ? "e" : this.base) + "^(" + String.format("%.4f", this.coefficients[0]) + " * x)";
 		System.out.println(toString());
 
-		
 	}
 	
-	public double [][] toA (double [] xCor){
+	public double [][] toA (double [][] X){
 		return MatrixOperations.join(
-				MatrixOperations.transpose1D(xCor), 
-				MatrixOperations.constantMatrix(xCor.length, 1, 1)
+				X, 
+				MatrixOperations.constantMatrix(X.length, 1, 1)
 				);
 	}
 
-	public double [][] toB (double [] yCor) {		
-		double [][] b = MatrixOperations.transpose1D(yCor);
+	public double [][] toB (double [] y) {		
+		double [][] b = MatrixOperations.transpose1D(y);
 		
 		for (int i = 0; i < b.length; i ++) {
 			for (int j = 0; j < b[0].length; j ++) {
-				b[i][j] = Math.log(b[i][j]) / Math.log(base);
+				b[i][j] = Math.log(b[i][j]) / Math.log(this.base);
 			}
 		}
 		
 		return b;
 	}
-	
-	public double [] predict (double [] xCor) {
+
+	@Override
+	public double [] predict (double [][] X) {
 		
-		double [] predictions = new double [xCor.length];
+		double [] predictions = new double [X.length];
 		
-		for (int i = 0; i < xCor.length; i ++) {
-			predictions[i] = coefficients[1] * Math.pow(base, coefficients[0] * xCor[i]);	
+		for (int i = 0; i < X.length; i ++) {
+			predictions[i] = this.coefficients[1] * Math.pow(this.base, this.coefficients[0] * X[i][0]);	
 		}
 		
 		return predictions;
 	}
-	
+
+	public double evaluate (double [][] X, double [] y) {
+		return rSquared(predict(X), y);
+	}
 	
 	@Override
 	public Graph getGraph () {
@@ -58,7 +62,7 @@ public class ExponentialRegressor extends Regressor{
 	}
 	
 	public double getBase() {
-		return base;
+		return this.base;
 	}
 
 }

@@ -1,33 +1,34 @@
 package regressor;
-import javax.swing.JFrame;
-
-import util.Graph;
+import util.MatrixOperations;
 import util.QRDecomposition;
+
+// Abstract regressor to determine regression model of the form Ax = b
+// With input data matrix (A), parameters (x), and target data matrix (b).
 
 public abstract class Regressor {
 	
-	protected double [] x;
+	protected double [][] X;
 	protected double [] y;
 	protected double [] coefficients;
 	protected String equation;
 	protected String type;
 	
-	public Regressor (double [] xCor, double [] yCor) {
+	// Input matrices X and y to perform least squares regression
+	// Each row in X represents an observation and each column a regressor
+	// Each column in y represents an observation
+	public Regressor (double [][] X, double [] y) {
 		
-		if (xCor.length != yCor.length) {
-			throw new IllegalArgumentException ("Must provide same number of X and Y coordinates");
+		if (X.length != y.length) {
+			throw new IllegalArgumentException ("X and y must be of same dimension.");
 		}
 		
-		this.x = xCor;
-		this.y = yCor;
-		
-		type = "none";
+		this.X = X;
+		this.y = y;
 	}
 	
-	abstract double [][] toA (double [] xCor);
-	abstract double [][] toB (double [] yCor);
-	
-	abstract double [] predict (double [] xCor);
+	abstract double [][] toA (double [][] X);
+	abstract double [][] toB (double [] y);
+	// abstract double [] predict (double [][] X);
 	
 	public double [] getSolution (double [][] A, double [][] b) {
 		
@@ -35,9 +36,15 @@ public abstract class Regressor {
 		return qr.solve(b);
 		
 	}
+
+	public double [] predict (double [][] X){
+		return MatrixOperations.transpose(
+			MatrixOperations.matrixMultiply(toA(X), MatrixOperations.transpose1D(this.coefficients))
+		)[0];
+	}
 	
-	public double evaluate (double [] xCor, double [] yCor) {
-		return rSquared(predict(xCor), yCor);
+	public double evaluate (double [][] X, double [] y) {
+		return rSquared(predict(X), y);
 	}
 	
 	public static double rSquared (double [] predicted, double [] actual) {
@@ -46,19 +53,15 @@ public abstract class Regressor {
 			throw new IllegalArgumentException("Must have same number of values in predicted and actual data sets");
 		}
 		
-		double unexplainedVariance = 0;
-		for (int i = 0; i < predicted.length; i ++) {
-			unexplainedVariance += Math.pow(predicted[i] - actual[i], 2);
-		}
-		
 		double average = 0;
 		for (int i = 0; i < actual.length; i ++) {
-			average += actual[i];
+			average += actual[i] / actual.length;
 		}
-		average /= actual.length;
 		
+		double unexplainedVariance = 0;
 		double totalVariance = 0;
 		for (int i = 0; i < actual.length; i ++) {
+			unexplainedVariance += Math.pow(predicted[i] - actual[i], 2);
 			totalVariance += Math.pow(actual[i] - average, 2);
 		}
 		
@@ -67,40 +70,27 @@ public abstract class Regressor {
 	}
 	
 	public String toString () {
-		return "Equation: " + equation;
+		return "Equation: " + this.equation;
 	}
 	
-	public Graph getGraph () {
-		return new Graph(this);
-	}
-	
-	public void graph () {
-        JFrame frame = new JFrame("Plot Regression");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(getGraph());
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-   }
-	
-	public double[] getX () {
-		return x;
+	public double[][] getX () {
+		return this.X;
 	}
 	
 	public double[] getY () {
-		return y;
+		return this.y;
 	}
 	
 	public double[] getCoefficients () {
-		return coefficients;
+		return this.coefficients;
 	}
 	
 	public String getEquation () {
-		return equation;
+		return this.equation;
 	}
 	
 	public String getType () {
-		return type;
+		return this.type;
 	}
 
 }

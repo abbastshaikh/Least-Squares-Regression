@@ -1,40 +1,28 @@
 package regressor;
 import util.MatrixOperations;
 
-public class LinearRegressor extends Regressor {
+public class LinearRegressor extends UnivariateRegressor {
 	
-	public LinearRegressor (double [] xCor, double [] yCor) {
+	public LinearRegressor (double [][] X, double [] y) {
 		
-		super(xCor, yCor);
-		type = "linear";
+		super(X, y);
 		
-		coefficients = getSolution(toA(x), toB(y));
-		
-		equation = "y = " + String.format("%.4f", coefficients[0]) + "x + " + String.format("%.4f", coefficients[1]);
+		this.type = "linear";
+		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.equation = "y = " + String.format("%.4f", this.coefficients[0]) + "x + " + String.format("%.4f", this.coefficients[1]);
 		System.out.println(toString());
 		
 	}
 	
-	public double [][] toA (double [] xCor){
+	public double [][] toA (double [][] X){
 		return MatrixOperations.join(
-				MatrixOperations.transpose1D(xCor), 
-				MatrixOperations.constantMatrix(xCor.length, 1, 1)
-				);
+				X, 
+				MatrixOperations.constantMatrix(X.length, 1, 1)
+			);
 	}
 
-	public double [][] toB (double [] yCor) {		
-		return MatrixOperations.transpose1D(yCor);
-	}
-	
-	public double [] predict (double [] xCor) {
-		
-		double [] predictions = new double [xCor.length];
-		
-		for (int i = 0; i < xCor.length; i ++) {
-			predictions[i] = coefficients[0] * xCor[i]+ coefficients[1];	
-		}
-		
-		return predictions;
+	public double [][] toB (double [] y) {		
+		return MatrixOperations.transpose1D(y);
 	}
 	
 }
