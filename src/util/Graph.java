@@ -83,8 +83,6 @@ public class Graph extends JPanel {
 			yAxisMin = Math.floor(min(this.y));
 			yAxisMax = Math.ceil(max(this.y));
 
-			System.out.println(xAxisMax);
-
 			xAxisRange = xAxisMax - xAxisMin;
 			yAxisRange = yAxisMax - yAxisMin;
 			xScale = (width - (2 * padding) - labelPadding) / (xAxisMax - xAxisMin);

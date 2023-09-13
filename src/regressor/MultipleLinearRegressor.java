@@ -7,7 +7,7 @@ public class MultipleLinearRegressor extends MultivariateRegressor {
 		
 		super(X, y);
 		
-		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.coefficients = getSolution(toDataMatrix(this.X), toTargetMatrix(this.y));
 		this.equation = "y = ";
 		
 		for(int i = 0; i < X[0].length + 1; i ++) {
@@ -28,15 +28,11 @@ public class MultipleLinearRegressor extends MultivariateRegressor {
 	}
 
 	
-	public double [][] toA (double [][] X){
+	protected double [][] toDataMatrix (double [][] X){
 		return MatrixOperations.join(
 				X, 
 				MatrixOperations.constantMatrix(X.length, 1, 1)
 			);
-	}
-
-	public double [][] toB (double [] y) {		
-		return MatrixOperations.transpose1D(y);
 	}
 	
 }

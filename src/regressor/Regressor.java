@@ -26,11 +26,13 @@ public abstract class Regressor {
 		this.y = y;
 	}
 	
-	abstract double [][] toA (double [][] X);
-	abstract double [][] toB (double [] y);
-	// abstract double [] predict (double [][] X);
+	protected abstract double [][] toDataMatrix (double [][] X);
+
+	protected double [][] toTargetMatrix (double [] y) {		
+		return MatrixOperations.transpose1D(y);
+	}
 	
-	public double [] getSolution (double [][] A, double [][] b) {
+	protected double [] getSolution (double [][] A, double [][] b) {
 		
 		QRDecomposition qr = new QRDecomposition(A);
 		return qr.solve(b);
@@ -39,7 +41,7 @@ public abstract class Regressor {
 
 	public double [] predict (double [][] X){
 		return MatrixOperations.transpose(
-			MatrixOperations.matrixMultiply(toA(X), MatrixOperations.transpose1D(this.coefficients))
+			MatrixOperations.matrixMultiply(toDataMatrix(X), MatrixOperations.transpose1D(this.coefficients))
 		)[0];
 	}
 	
@@ -47,7 +49,7 @@ public abstract class Regressor {
 		return rSquared(predict(X), y);
 	}
 	
-	public static double rSquared (double [] predicted, double [] actual) {
+	protected static double rSquared (double [] predicted, double [] actual) {
 		
 		if (predicted.length != actual.length) {
 			throw new IllegalArgumentException("Must have same number of values in predicted and actual data sets");

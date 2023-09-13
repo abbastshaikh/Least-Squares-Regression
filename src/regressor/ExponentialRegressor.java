@@ -12,8 +12,7 @@ public class ExponentialRegressor extends UnivariateRegressor{
 		super(X, y);
 		this.base = b;
 		this.type = "exponential";
-		
-		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.coefficients = getSolution(toDataMatrix(this.X), toTargetMatrix(this.y));
 		this.coefficients[1] = Math.pow(base, this.coefficients[1]);
 		
 		this.equation = "y = " + String.format("%.4f", this.coefficients[1]) + " * " + (this.base == Math.E ? "e" : this.base) + "^(" + String.format("%.4f", this.coefficients[0]) + " * x)";
@@ -21,14 +20,15 @@ public class ExponentialRegressor extends UnivariateRegressor{
 
 	}
 	
-	public double [][] toA (double [][] X){
+	protected double [][] toDataMatrix (double [][] X){
 		return MatrixOperations.join(
 				X, 
 				MatrixOperations.constantMatrix(X.length, 1, 1)
 				);
 	}
 
-	public double [][] toB (double [] y) {		
+	@Override
+	protected double [][] toTargetMatrix (double [] y) {		
 		double [][] b = MatrixOperations.transpose1D(y);
 		
 		for (int i = 0; i < b.length; i ++) {
@@ -50,10 +50,6 @@ public class ExponentialRegressor extends UnivariateRegressor{
 		}
 		
 		return predictions;
-	}
-
-	public double evaluate (double [][] X, double [] y) {
-		return rSquared(predict(X), y);
 	}
 	
 	@Override

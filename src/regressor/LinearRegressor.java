@@ -8,21 +8,17 @@ public class LinearRegressor extends UnivariateRegressor {
 		super(X, y);
 		
 		this.type = "linear";
-		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.coefficients = getSolution(toDataMatrix(this.X), toTargetMatrix(this.y));
 		this.equation = "y = " + String.format("%.4f", this.coefficients[0]) + "x + " + String.format("%.4f", this.coefficients[1]);
 		System.out.println(toString());
 		
 	}
 	
-	public double [][] toA (double [][] X){
+	protected double [][] toDataMatrix (double [][] X){
 		return MatrixOperations.join(
 				X, 
 				MatrixOperations.constantMatrix(X.length, 1, 1)
 			);
-	}
-
-	public double [][] toB (double [] y) {		
-		return MatrixOperations.transpose1D(y);
 	}
 	
 }

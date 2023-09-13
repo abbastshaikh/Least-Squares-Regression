@@ -1,5 +1,4 @@
 package regressor;
-import util.MatrixOperations;
 
 public class PolynomialRegressor extends UnivariateRegressor {
 		
@@ -11,7 +10,7 @@ public class PolynomialRegressor extends UnivariateRegressor {
 		this.degree = d;
 		this.type = "polynomial";
 		
-		this.coefficients = getSolution(toA(this.X), toB(this.y));
+		this.coefficients = getSolution(toDataMatrix(this.X), toTargetMatrix(this.y));
 
 		this.equation = "y = ";
 		
@@ -33,21 +32,17 @@ public class PolynomialRegressor extends UnivariateRegressor {
 		
 	}
 
-	public double [][] toA (double [][] X){
+	protected double [][] toDataMatrix (double [][] X){
 		
-		double [][] A = new double [X.length][degree + 1];
+		double [][] A = new double [X.length][this.degree + 1];
 		
 		for (int i = 0; i < X.length; i ++) {
-			for (int j = degree; j >= 0; j --) {
-				A[i][degree - j] = Math.pow(X[i][0], j);
+			for (int j = this.degree; j >= 0; j --) {
+				A[i][this.degree - j] = Math.pow(X[i][0], j);
 			}
 		}
 		
 		return A;
-	}
-
-	public double [][] toB (double [] y) {		
-		return MatrixOperations.transpose1D(y);
 	}
 	
 	public int getDegree (){
